@@ -810,7 +810,9 @@
             <p><strong>Move Piece:</strong> Move one of your existing pieces to an adjacent empty square.</p>
             
             <h3>⚔️ Capturing</h3>
-            <p>After placing or moving a piece, if you can capture an opponent's piece using RPS rules, you'll enter capture mode. Click your piece, then click the opponent's piece to capture it!</p>
+            <p>After placing or moving a piece, if you can capture an opponent's piece using RPS rules, you'll enter capture mode. You can only capture pieces that are adjacent (sharing an edge) or diagonally adjacent (kitty-corner) to your piece.</p>
+            <p><strong>Adjacent positions:</strong> Up, down, left, right, and all 4 diagonal corners from your piece.</p>
+            <p>Click your piece, then click the adjacent opponent's piece to capture it!</p>
             
             <h3>🏆 Winning</h3>
             <ul>
@@ -926,13 +928,27 @@
             return false;
         }
 
+        function isAdjacent(index1, index2) {
+            const row1 = Math.floor(index1 / 3);
+            const col1 = index1 % 3;
+            const row2 = Math.floor(index2 / 3);
+            const col2 = index2 % 3;
+            
+            const rowDiff = Math.abs(row1 - row2);
+            const colDiff = Math.abs(col1 - col2);
+            
+            // Adjacent if they're next to each other horizontally, vertically, or diagonally
+            return (rowDiff <= 1 && colDiff <= 1) && !(rowDiff === 0 && colDiff === 0);
+        }
+
         function checkCapturePossible() {
             for (let i = 0; i < 9; i++) {
                 const cell = gameState.board[i];
                 if (cell && cell.player === gameState.currentPlayer) {
                     for (let j = 0; j < 9; j++) {
                         const target = gameState.board[j];
-                        if (target && target.player !== gameState.currentPlayer && canCapture(cell.piece, target.piece)) {
+                        if (target && target.player !== gameState.currentPlayer && 
+                            isAdjacent(i, j) && canCapture(cell.piece, target.piece)) {
                             return true;
                         }
                     }
@@ -954,7 +970,8 @@
                     if (cell && cell.player === gameState.currentPlayer) {
                         for (let j = 0; j < 9; j++) {
                             const target = gameState.board[j];
-                            if (target && target.player !== gameState.currentPlayer && canCapture(cell.piece, target.piece)) {
+                            if (target && target.player !== gameState.currentPlayer && 
+                                isAdjacent(i, j) && canCapture(cell.piece, target.piece)) {
                                 document.querySelector(`[data-index="${i}"]`).classList.add('capturable');
                                 break;
                             }
@@ -967,7 +984,8 @@
                 
                 for (let j = 0; j < 9; j++) {
                     const target = gameState.board[j];
-                    if (target && target.player !== gameState.currentPlayer && canCapture(attackerCell.piece, target.piece)) {
+                    if (target && target.player !== gameState.currentPlayer && 
+                        isAdjacent(gameState.selectedCaptureCell, j) && canCapture(attackerCell.piece, target.piece)) {
                         document.querySelector(`[data-index="${j}"]`).classList.add('capturable');
                     }
                 }
@@ -1047,7 +1065,8 @@
                         let canCaptureAny = false;
                         for (let j = 0; j < 9; j++) {
                             const target = gameState.board[j];
-                            if (target && target.player !== gameState.currentPlayer && canCapture(cell.piece, target.piece)) {
+                            if (target && target.player !== gameState.currentPlayer && 
+                                isAdjacent(index, j) && canCapture(cell.piece, target.piece)) {
                                 canCaptureAny = true;
                                 break;
                             }
@@ -1059,7 +1078,8 @@
                     }
                 } else {
                     const attackerCell = gameState.board[gameState.selectedCaptureCell];
-                    if (cell && cell.player !== gameState.currentPlayer && canCapture(attackerCell.piece, cell.piece)) {
+                    if (cell && cell.player !== gameState.currentPlayer && 
+                        isAdjacent(gameState.selectedCaptureCell, index) && canCapture(attackerCell.piece, cell.piece)) {
                         gameState.board[index] = attackerCell;
                         gameState.board[gameState.selectedCaptureCell] = null;
                         
