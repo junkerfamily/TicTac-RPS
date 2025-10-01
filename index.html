@@ -29,8 +29,9 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             max-width: 100%;
             width: 100%;
-            max-height: 100vh;
+            max-height: calc(100vh - 20px);
             overflow-y: auto;
+            padding-bottom: 200px; /* room for sticky stats and reset on mobile/desktop */
         }
 
         /* Mobile-first responsive design */
@@ -61,9 +62,17 @@
         @media (min-width: 1024px) {
             .container {
                 max-width: 760px;
+                padding-bottom: 240px; /* keep room for sticky stats + reset */
             }
             .board {
                 max-width: 520px;
+            }
+            .stats {
+                position: sticky;
+                bottom: 64px; /* sit above sticky reset button */
+                z-index: 4;
+                background: white;
+                padding-top: 6px;
             }
         }
 
@@ -341,6 +350,15 @@
             margin-bottom: 15px;
         }
 
+        /* Keep stats row always visible above the sticky reset button */
+        .stats {
+            position: sticky;
+            bottom: 64px;
+            z-index: 4;
+            background: white;
+            padding-top: 6px;
+        }
+
         .stat-box {
             padding: 12px;
             border-radius: 8px;
@@ -404,6 +422,10 @@
             transition: all 0.3s ease;
             font-weight: bold;
             touch-action: manipulation;
+            position: sticky;
+            bottom: 0;
+            z-index: 5;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
         }
 
         /* Mobile button optimization */
