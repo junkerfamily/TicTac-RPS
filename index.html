@@ -804,20 +804,12 @@
         
         <div class="stats">
             <div class="stat-box red">
-                <h3>Red Captures</h3>
-                <div class="number" id="redCaptures">0</div>
+                <h3>Red Captures/Wins</h3>
+                <div class="number" id="redStats">C: 0 | W: 0</div>
             </div>
             <div class="stat-box blue">
-                <h3>Blue Captures</h3>
-                <div class="number" id="blueCaptures">0</div>
-            </div>
-            <div class="stat-box red">
-                <h3>Red Wins</h3>
-                <div class="number" id="redWins">0</div>
-            </div>
-            <div class="stat-box blue">
-                <h3>Blue Wins</h3>
-                <div class="number" id="blueWins">0</div>
+                <h3>Blue Captures/Wins</h3>
+                <div class="number" id="blueStats">C: 0 | W: 0</div>
             </div>
         </div>
         
@@ -922,10 +914,10 @@
             turnIndicator.textContent = `${gameState.currentPlayer === 'red' ? 'Red' : 'Blue'}'s Turn`;
             turnIndicator.className = `turn-indicator ${gameState.currentPlayer}`;
             
-            document.getElementById('redCaptures').textContent = gameState.redCaptures;
-            document.getElementById('blueCaptures').textContent = gameState.blueCaptures;
-            document.getElementById('redWins').textContent = gameState.redWins;
-            document.getElementById('blueWins').textContent = gameState.blueWins;
+            const redStatsEl = document.getElementById('redStats');
+            const blueStatsEl = document.getElementById('blueStats');
+            if (redStatsEl) redStatsEl.textContent = `C: ${gameState.redCaptures} | W: ${gameState.redWins}`;
+            if (blueStatsEl) blueStatsEl.textContent = `C: ${gameState.blueCaptures} | W: ${gameState.blueWins}`;
             
             const gameMode = document.getElementById('gameMode');
             if (gameState.captureMode) {
