@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPS Tic-Tac-Toe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .turn-indicator {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .turn-indicator.red {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .turn-indicator.blue {
+            background: #4ecdc4;
+            color: white;
+        }
+
+        .piece-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .piece-btn {
+            padding: 15px 25px;
+            font-size: 1.5em;
+            border: 3px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f0f0f0;
+        }
+
+        .piece-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .piece-btn.selected {
+            border-color: #333;
+            background: #fff;
+            transform: scale(1.15);
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px auto;
+            max-width: 400px;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .cell:hover:not(.occupied) {
+            background: #f9f9f9;
+            border-color: #999;
+        }
+
+        .cell.red {
+            background: #ffe0e0;
+            border-color: #ff6b6b;
+        }
+
+        .cell.blue {
+            background: #e0f7f5;
+            border-color: #4ecdc4;
+        }
+
+        .cell.capturable {
+            animation: pulse 1s infinite;
+            cursor: pointer;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .cell.selected-for-capture {
+            border-color: #ffd700;
+            border-width: 5px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-box.red {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .stat-box.blue {
+            background: #4ecdc4;
+            color: white;
+        }
+
+        .stat-box h3 {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .stat-box .number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .reset-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .reset-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .game-mode {
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .mode-btn {
+            padding: 10px 20px;
+            font-size: 1em;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn:hover {
+            border-color: #999;
+        }
+
+        .mode-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .cell.moveable {
+            animation: bounce 0.5s ease infinite;
+            cursor: pointer;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .cell.valid-move {
+            background: #fff8dc !important;
+            border-color: #ffd700 !important;
+            cursor: pointer;
+        }
+
+        .winner-banner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px 60px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            z-index: 1000;
+            text-align: center;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .winner-banner h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 RPS Tic-Tac-Toe</h1>
+        
+        <div class="turn-indicator" id="turnIndicator">Red's Turn</div>
+        
+        <div class="mode-selector">
+            <button class="mode-btn active" id="placeBtn" onclick="setMode('place')">Place Piece</button>
+            <button class="mode-btn" id="moveBtn" onclick="setMode('move')">Move Piece</button>
+        </div>
+
+        <div class="piece-selector" id="pieceSelector">
+            <button class="piece-btn" data-piece="rock">🪨</button>
+            <button class="piece-btn" data-piece="paper">📄</button>
+            <button class="piece-btn" data-piece="scissors">✂️</button>
+        </div>
+
+        <div class="game-mode" id="gameMode">Select a piece and place it on the board</div>
+        
+        <div class="board" id="board"></div>
+        
+        <div class="stats">
+            <div class="stat-box red">
+                <h3>Red Captures</h3>
+                <div class="number" id="redCaptures">0</div>
+            </div>
+            <div class="stat-box blue">
+                <h3>Blue Captures</h3>
+                <div class="number" id="blueCaptures">0</div>
+            </div>
+            <div class="stat-box red">
+                <h3>Red Wins</h3>
+                <div class="number" id="redWins">0</div>
+            </div>
+            <div class="stat-box blue">
+                <h3>Blue Wins</h3>
+                <div class="number" id="blueWins">0</div>
+            </div>
+        </div>
+        
+        <button class="reset-btn" onclick="resetGame()">Reset Game</button>
+    </div>
+
+    <script>
+        const pieceEmojis = {
+            rock: '🪨',
+            paper: '📄',
+            scissors: '✂️'
+        };
+
+        let gameState = {
+            board: Array(9).fill(null),
+            currentPlayer: 'red',
+            selectedPiece: null,
+            captureMode: false,
+            selectedCaptureCell: null,
+            redCaptures: 0,
+            blueCaptures: 0,
+            redWins: 0,
+            blueWins: 0,
+            gameOver: false,
+            turnMode: 'place',
+            selectedMoveCell: null
+        };
+
+        function initBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.dataset.index = i;
+                cell.onclick = () => handleCellClick(i);
+                board.appendChild(cell);
+            }
+        }
+
+        function updateBoard() {
+            gameState.board.forEach((cell, i) => {
+                const cellEl = document.querySelector(`[data-index="${i}"]`);
+                if (cell) {
+                    cellEl.textContent = pieceEmojis[cell.piece];
+                    cellEl.className = `cell ${cell.player} occupied`;
+                } else {
+                    cellEl.textContent = '';
+                    cellEl.className = 'cell';
+                }
+            });
+            
+            highlightMovement();
+        }
+
+        function updateUI() {
+            const turnIndicator = document.getElementById('turnIndicator');
+            turnIndicator.textContent = `${gameState.currentPlayer === 'red' ? 'Red' : 'Blue'}'s Turn`;
+            turnIndicator.className = `turn-indicator ${gameState.currentPlayer}`;
+            
+            document.getElementById('redCaptures').textContent = gameState.redCaptures;
+            document.getElementById('blueCaptures').textContent = gameState.blueCaptures;
+            document.getElementById('redWins').textContent = gameState.redWins;
+            document.getElementById('blueWins').textContent = gameState.blueWins;
+            
+            const gameMode = document.getElementById('gameMode');
+            if (gameState.captureMode) {
+                if (gameState.selectedCaptureCell !== null) {
+                    gameMode.textContent = 'Click an opponent piece to capture it';
+                } else {
+                    gameMode.textContent = 'Click your piece to attempt a capture';
+                }
+            } else if (gameState.turnMode === 'move') {
+                if (gameState.selectedMoveCell !== null) {
+                    gameMode.textContent = 'Click an adjacent empty square to move';
+                } else {
+                    gameMode.textContent = 'Click your piece to move it';
+                }
+            } else {
+                gameMode.textContent = 'Select a piece and place it on the board';
+            }
+            
+            document.getElementById('pieceSelector').style.display = 
+                (gameState.captureMode || gameState.turnMode === 'move') ? 'none' : 'flex';
+        }
+
+        document.querySelectorAll('.piece-btn').forEach(btn => {
+            btn.onclick = () => {
+                if (gameState.gameOver || gameState.captureMode) return;
+                
+                document.querySelectorAll('.piece-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                gameState.selectedPiece = btn.dataset.piece;
+            };
+        });
+
+        function canCapture(attacker, defender) {
+            if (attacker === 'rock') return defender === 'scissors';
+            if (attacker === 'paper') return defender === 'rock';
+            if (attacker === 'scissors') return defender === 'paper';
+            return false;
+        }
+
+        function checkCapturePossible() {
+            for (let i = 0; i < 9; i++) {
+                const cell = gameState.board[i];
+                if (cell && cell.player === gameState.currentPlayer) {
+                    for (let j = 0; j < 9; j++) {
+                        const target = gameState.board[j];
+                        if (target && target.player !== gameState.currentPlayer && canCapture(cell.piece, target.piece)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function highlightCapturablePieces() {
+            document.querySelectorAll('.cell').forEach(cellEl => {
+                cellEl.classList.remove('capturable', 'selected-for-capture');
+            });
+            
+            if (!gameState.captureMode) return;
+            
+            if (gameState.selectedCaptureCell === null) {
+                for (let i = 0; i < 9; i++) {
+                    const cell = gameState.board[i];
+                    if (cell && cell.player === gameState.currentPlayer) {
+                        for (let j = 0; j < 9; j++) {
+                            const target = gameState.board[j];
+                            if (target && target.player !== gameState.currentPlayer && canCapture(cell.piece, target.piece)) {
+                                document.querySelector(`[data-index="${i}"]`).classList.add('capturable');
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                const attackerCell = gameState.board[gameState.selectedCaptureCell];
+                document.querySelector(`[data-index="${gameState.selectedCaptureCell}"]`).classList.add('selected-for-capture');
+                
+                for (let j = 0; j < 9; j++) {
+                    const target = gameState.board[j];
+                    if (target && target.player !== gameState.currentPlayer && canCapture(attackerCell.piece, target.piece)) {
+                        document.querySelector(`[data-index="${j}"]`).classList.add('capturable');
+                    }
+                }
+            }
+        }
+
+        function setMode(mode) {
+            if (gameState.gameOver || gameState.captureMode) return;
+            
+            gameState.turnMode = mode;
+            gameState.selectedPiece = null;
+            gameState.selectedMoveCell = null;
+            
+            document.querySelectorAll('.piece-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            
+            if (mode === 'place') {
+                document.getElementById('placeBtn').classList.add('active');
+            } else {
+                document.getElementById('moveBtn').classList.add('active');
+            }
+            
+            updateUI();
+            updateBoard();
+        }
+
+        function getAdjacentCells(index) {
+            const row = Math.floor(index / 3);
+            const col = index % 3;
+            const adjacent = [];
+            
+            if (row > 0) adjacent.push(index - 3);
+            if (row < 2) adjacent.push(index + 3);
+            if (col > 0) adjacent.push(index - 1);
+            if (col < 2) adjacent.push(index + 1);
+            
+            return adjacent;
+        }
+
+        function highlightMovement() {
+            document.querySelectorAll('.cell').forEach(cellEl => {
+                cellEl.classList.remove('moveable', 'valid-move');
+            });
+            
+            if (gameState.turnMode !== 'move' || gameState.captureMode) return;
+            
+            if (gameState.selectedMoveCell === null) {
+                for (let i = 0; i < 9; i++) {
+                    const cell = gameState.board[i];
+                    if (cell && cell.player === gameState.currentPlayer) {
+                        const adjacent = getAdjacentCells(i);
+                        const hasEmptyAdjacent = adjacent.some(adj => !gameState.board[adj]);
+                        if (hasEmptyAdjacent) {
+                            document.querySelector(`[data-index="${i}"]`).classList.add('moveable');
+                        }
+                    }
+                }
+            } else {
+                document.querySelector(`[data-index="${gameState.selectedMoveCell}"]`).classList.add('selected-for-capture');
+                const adjacent = getAdjacentCells(gameState.selectedMoveCell);
+                adjacent.forEach(adj => {
+                    if (!gameState.board[adj]) {
+                        document.querySelector(`[data-index="${adj}"]`).classList.add('valid-move');
+                    }
+                });
+            }
+        }
+
+        function handleCellClick(index) {
+            if (gameState.gameOver) return;
+            
+            const cell = gameState.board[index];
+            
+            if (gameState.captureMode) {
+                if (gameState.selectedCaptureCell === null) {
+                    if (cell && cell.player === gameState.currentPlayer) {
+                        let canCaptureAny = false;
+                        for (let j = 0; j < 9; j++) {
+                            const target = gameState.board[j];
+                            if (target && target.player !== gameState.currentPlayer && canCapture(cell.piece, target.piece)) {
+                                canCaptureAny = true;
+                                break;
+                            }
+                        }
+                        if (canCaptureAny) {
+                            gameState.selectedCaptureCell = index;
+                            highlightCapturablePieces();
+                        }
+                    }
+                } else {
+                    const attackerCell = gameState.board[gameState.selectedCaptureCell];
+                    if (cell && cell.player !== gameState.currentPlayer && canCapture(attackerCell.piece, cell.piece)) {
+                        gameState.board[index] = attackerCell;
+                        gameState.board[gameState.selectedCaptureCell] = null;
+                        
+                        if (gameState.currentPlayer === 'red') {
+                            gameState.redCaptures++;
+                        } else {
+                            gameState.blueCaptures++;
+                        }
+                        
+                        gameState.captureMode = false;
+                        gameState.selectedCaptureCell = null;
+                        updateBoard();
+                        updateUI();
+                        highlightCapturablePieces();
+                    }
+                }
+            } else if (gameState.turnMode === 'move') {
+                if (gameState.selectedMoveCell === null) {
+                    if (cell && cell.player === gameState.currentPlayer) {
+                        const adjacent = getAdjacentCells(index);
+                        const hasEmptyAdjacent = adjacent.some(adj => !gameState.board[adj]);
+                        if (hasEmptyAdjacent) {
+                            gameState.selectedMoveCell = index;
+                            updateBoard();
+                        }
+                    }
+                } else {
+                    const adjacent = getAdjacentCells(gameState.selectedMoveCell);
+                    if (!cell && adjacent.includes(index)) {
+                        gameState.board[index] = gameState.board[gameState.selectedMoveCell];
+                        gameState.board[gameState.selectedMoveCell] = null;
+                        
+                        updateBoard();
+                        
+                        if (checkWinner()) {
+                            return;
+                        }
+                        
+                        gameState.currentPlayer = gameState.currentPlayer === 'red' ? 'blue' : 'red';
+                        gameState.selectedMoveCell = null;
+                        gameState.turnMode = 'place';
+                        setMode('place');
+                        
+                        if (checkCapturePossible()) {
+                            gameState.captureMode = true;
+                            highlightCapturablePieces();
+                        }
+                        
+                        updateUI();
+                    }
+                }
+            } else {
+                if (!cell && gameState.selectedPiece) {
+                    gameState.board[index] = {
+                        player: gameState.currentPlayer,
+                        piece: gameState.selectedPiece
+                    };
+                    
+                    updateBoard();
+                    
+                    if (checkWinner()) {
+                        return;
+                    }
+                    
+                    gameState.currentPlayer = gameState.currentPlayer === 'red' ? 'blue' : 'red';
+                    gameState.selectedPiece = null;
+                    document.querySelectorAll('.piece-btn').forEach(b => b.classList.remove('selected'));
+                    
+                    gameState.turnMode = 'place';
+                    setMode('place');
+                    
+                    if (checkCapturePossible()) {
+                        gameState.captureMode = true;
+                        highlightCapturablePieces();
+                    }
+                    
+                    updateUI();
+                }
+            }
+        }
+
+        function checkWinner() {
+            const lines = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+            
+            for (const [a, b, c] of lines) {
+                if (gameState.board[a] && gameState.board[b] && gameState.board[c]) {
+                    if (gameState.board[a].player === gameState.board[b].player &&
+                        gameState.board[a].player === gameState.board[c].player) {
+                        
+                        // Check if all 3 pieces are the same type (special win)
+                        if (gameState.board[a].piece === gameState.board[b].piece &&
+                            gameState.board[a].piece === gameState.board[c].piece) {
+                            showWinner(gameState.board[a].player, true);
+                            return true;
+                        } else {
+                            showWinner(gameState.board[a].player, false);
+                            return true;
+                        }
+                    }
+                }
+            }
+            
+            if (gameState.board.every(cell => cell !== null)) {
+                showWinner('draw', false);
+                return true;
+            }
+            
+            return false;
+        }
+
+        function showWinner(winner, isSpecial) {
+            gameState.gameOver = true;
+            
+            if (winner !== 'draw') {
+                const points = isSpecial ? 2 : 1;
+                if (winner === 'red') {
+                    gameState.redWins += points;
+                } else {
+                    gameState.blueWins += points;
+                }
+            }
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'overlay';
+            
+            const banner = document.createElement('div');
+            banner.className = 'winner-banner';
+            
+            if (winner === 'draw') {
+                banner.innerHTML = `
+                    <h2>It's a Draw!</h2>
+                    <button class="reset-btn" onclick="closeWinnerBanner()">Play Again</button>
+                `;
+            } else {
+                const winType = isSpecial ? 
+                    '<p style="font-size: 1.2em; margin-top: 10px;">🎉 SPECIAL WIN! 3 matching pieces! +2 points 🎉</p>' : 
+                    '';
+                banner.innerHTML = `
+                    <h2 style="color: ${winner === 'red' ? '#ff6b6b' : '#4ecdc4'}">${winner === 'red' ? 'Red' : 'Blue'} Wins!</h2>
+                    ${winType}
+                    <button class="reset-btn" onclick="closeWinnerBanner()">Play Again</button>
+                `;
+            }
+            
+            document.body.appendChild(overlay);
+            document.body.appendChild(banner);
+            
+            updateUI();
+        }
+
+        function closeWinnerBanner() {
+            const overlay = document.querySelector('.overlay');
+            const banner = document.querySelector('.winner-banner');
+            if (overlay) overlay.remove();
+            if (banner) banner.remove();
+            resetGame();
+        }
+
+        function resetGame() {
+            gameState.board = Array(9).fill(null);
+            gameState.currentPlayer = 'red';
+            gameState.selectedPiece = null;
+            gameState.captureMode = false;
+            gameState.selectedCaptureCell = null;
+            gameState.gameOver = false;
+            gameState.turnMode = 'place';
+            gameState.selectedMoveCell = null;
+            
+            document.querySelectorAll('.piece-btn').forEach(b => b.classList.remove('selected'));
+            setMode('place');
+            
+            updateBoard();
+            updateUI();
+        }
+
+        initBoard();
+        updateUI();
+    </script>
+</body>
+</html>
