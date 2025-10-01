@@ -182,15 +182,15 @@
         }
 
         .piece-btn {
-            padding: 12px 20px;
-            font-size: 1.3em;
+            padding: 8px;
+            font-size: 2.5em;
             border: 2px solid transparent;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
             background: #f0f0f0;
-            min-width: 60px;
-            min-height: 50px;
+            min-width: 80px;
+            min-height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -204,10 +204,10 @@
             }
             
             .piece-btn {
-                padding: 10px 15px;
-                font-size: 1.1em;
-                min-width: 50px;
-                min-height: 45px;
+                padding: 6px;
+                font-size: 2em;
+                min-width: 70px;
+                min-height: 70px;
             }
         }
 
@@ -218,10 +218,10 @@
             }
             
             .piece-btn {
-                padding: 8px 12px;
-                font-size: 1em;
-                min-width: 45px;
-                min-height: 40px;
+                padding: 4px;
+                font-size: 1.8em;
+                min-width: 60px;
+                min-height: 60px;
             }
         }
 
@@ -252,7 +252,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 2.5em;
+            font-size: var(--cell-font-size, 2.5em);
+            line-height: 1;
             cursor: pointer;
             transition: all 0.3s ease;
             background: white;
@@ -268,7 +269,6 @@
             }
             
             .cell {
-                font-size: 2em;
                 min-height: 50px;
                 border-radius: 6px;
             }
@@ -281,7 +281,6 @@
             }
             
             .cell {
-                font-size: 1.8em;
                 min-height: 45px;
                 border-radius: 5px;
             }
@@ -290,7 +289,6 @@
         /* Ensure board fits on small screens */
         @media (max-width: 360px) {
             .cell {
-                font-size: 1.5em;
                 min-height: 40px;
             }
         }
@@ -863,6 +861,8 @@
                 cell.onclick = () => handleCellClick(i);
                 board.appendChild(cell);
             }
+            // Ensure fonts are sized after initial render
+            requestAnimationFrame(resizeCellFonts);
         }
 
         function updateBoard() {
@@ -878,6 +878,7 @@
             });
             
             highlightMovement();
+            resizeCellFonts();
         }
 
         function updateUI() {
@@ -1296,6 +1297,26 @@
 
         initBoard();
         updateUI();
+
+        function resizeCellFonts() {
+            const board = document.getElementById('board');
+            if (!board) return;
+            const cells = board.querySelectorAll('.cell');
+            if (cells.length === 0) return;
+            const firstCell = cells[0];
+            const cellSize = Math.min(firstCell.clientWidth, firstCell.clientHeight);
+            if (!cellSize) return;
+            // Make emoji large but leave a little padding
+            const fontSizePx = Math.floor(cellSize * 0.55);
+            cells.forEach(el => {
+                el.style.setProperty('--cell-font-size', fontSizePx + 'px');
+            });
+        }
+
+        window.addEventListener('resize', resizeCellFonts);
+        window.addEventListener('orientationchange', resizeCellFonts);
+        // Ensure sizing once DOM and styles are fully applied
+        window.addEventListener('load', resizeCellFonts);
     </script>
 </body>
 </html>
