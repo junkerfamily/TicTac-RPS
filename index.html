@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RPS Tic-Tac-Toe</title>
     <style>
         * {
@@ -18,33 +18,150 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
+            overflow-x: hidden;
         }
 
         .container {
             background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 600px;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 100%;
             width: 100%;
+            max-height: 100vh;
+            overflow-y: auto;
+        }
+
+        /* Mobile-first responsive design */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+                min-height: 100vh;
+                align-items: flex-start;
+                padding-top: 10px;
+            }
+            
+            .container {
+                padding: 10px;
+                border-radius: 10px;
+                max-height: calc(100vh - 10px);
+                overflow-y: auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 8px;
+                border-radius: 8px;
+            }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
         }
 
         h1 {
-            text-align: center;
             color: #333;
-            margin-bottom: 20px;
-            font-size: 2em;
+            font-size: 1.8em;
+            margin: 0;
+            flex: 1;
+            text-align: center;
+        }
+
+        .rules-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .rules-btn:hover {
+            background: #764ba2;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        /* Mobile header adjustments */
+        @media (max-width: 768px) {
+            .header {
+                margin-bottom: 12px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .rules-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 1.1em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                margin-bottom: 10px;
+            }
+            
+            h1 {
+                font-size: 1.3em;
+            }
+            
+            .rules-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 1em;
+            }
         }
 
         .turn-indicator {
             text-align: center;
-            font-size: 1.5em;
+            font-size: 1.3em;
             font-weight: bold;
-            margin-bottom: 20px;
-            padding: 10px;
-            border-radius: 10px;
+            margin-bottom: 15px;
+            padding: 8px;
+            border-radius: 8px;
             transition: all 0.3s ease;
+        }
+
+        /* Mobile typography adjustments */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5em;
+                margin-bottom: 12px;
+            }
+            
+            .turn-indicator {
+                font-size: 1.1em;
+                margin-bottom: 12px;
+                padding: 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.3em;
+                margin-bottom: 10px;
+            }
+            
+            .turn-indicator {
+                font-size: 1em;
+                margin-bottom: 10px;
+                padding: 5px;
+            }
         }
 
         .turn-indicator.red {
@@ -60,18 +177,52 @@
         .piece-selector {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
         .piece-btn {
-            padding: 15px 25px;
-            font-size: 1.5em;
-            border: 3px solid transparent;
-            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 1.3em;
+            border: 2px solid transparent;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
             background: #f0f0f0;
+            min-width: 60px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Mobile piece selector */
+        @media (max-width: 768px) {
+            .piece-selector {
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+            
+            .piece-btn {
+                padding: 10px 15px;
+                font-size: 1.1em;
+                min-width: 50px;
+                min-height: 45px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .piece-selector {
+                gap: 6px;
+                margin-bottom: 10px;
+            }
+            
+            .piece-btn {
+                padding: 8px 12px;
+                font-size: 1em;
+                min-width: 45px;
+                min-height: 40px;
+            }
         }
 
         .piece-btn:hover {
@@ -88,22 +239,60 @@
         .board {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 20px auto;
-            max-width: 400px;
+            gap: 8px;
+            margin: 15px auto;
+            max-width: 100%;
+            width: 100%;
         }
 
         .cell {
             aspect-ratio: 1;
-            border: 3px solid #ddd;
-            border-radius: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 3em;
+            font-size: 2.5em;
             cursor: pointer;
             transition: all 0.3s ease;
             background: white;
+            min-height: 60px;
+            touch-action: manipulation;
+        }
+
+        /* Mobile board optimization */
+        @media (max-width: 768px) {
+            .board {
+                gap: 6px;
+                margin: 12px auto;
+            }
+            
+            .cell {
+                font-size: 2em;
+                min-height: 50px;
+                border-radius: 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .board {
+                gap: 4px;
+                margin: 10px auto;
+            }
+            
+            .cell {
+                font-size: 1.8em;
+                min-height: 45px;
+                border-radius: 5px;
+            }
+        }
+
+        /* Ensure board fits on small screens */
+        @media (max-width: 360px) {
+            .cell {
+                font-size: 1.5em;
+                min-height: 40px;
+            }
         }
 
         .cell:hover:not(.occupied) {
@@ -140,14 +329,39 @@
         .stats {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
         .stat-box {
-            padding: 15px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 8px;
             text-align: center;
+        }
+
+        /* Mobile stats optimization */
+        @media (max-width: 768px) {
+            .stats {
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+            
+            .stat-box {
+                padding: 10px;
+                border-radius: 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats {
+                gap: 6px;
+                margin-bottom: 10px;
+            }
+            
+            .stat-box {
+                padding: 8px;
+                border-radius: 5px;
+            }
         }
 
         .stat-box.red {
@@ -172,15 +386,33 @@
 
         .reset-btn {
             width: 100%;
-            padding: 15px;
-            font-size: 1.2em;
+            padding: 12px;
+            font-size: 1.1em;
             background: #667eea;
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: bold;
+            touch-action: manipulation;
+        }
+
+        /* Mobile button optimization */
+        @media (max-width: 768px) {
+            .reset-btn {
+                padding: 10px;
+                font-size: 1em;
+                border-radius: 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .reset-btn {
+                padding: 8px;
+                font-size: 0.9em;
+                border-radius: 5px;
+            }
         }
 
         .reset-btn:hover {
@@ -200,18 +432,50 @@
         .mode-selector {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
         .mode-btn {
-            padding: 10px 20px;
-            font-size: 1em;
+            padding: 8px 16px;
+            font-size: 0.9em;
             border: 2px solid #ddd;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             background: white;
             transition: all 0.3s ease;
+            touch-action: manipulation;
+            flex: 1;
+            max-width: 120px;
+        }
+
+        /* Mobile mode selector */
+        @media (max-width: 768px) {
+            .mode-selector {
+                gap: 6px;
+                margin-bottom: 10px;
+            }
+            
+            .mode-btn {
+                padding: 6px 12px;
+                font-size: 0.8em;
+                border-radius: 5px;
+                max-width: 100px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .mode-selector {
+                gap: 4px;
+                margin-bottom: 8px;
+            }
+            
+            .mode-btn {
+                padding: 5px 10px;
+                font-size: 0.75em;
+                border-radius: 4px;
+                max-width: 90px;
+            }
         }
 
         .mode-btn:hover {
@@ -246,12 +510,31 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: white;
-            padding: 40px 60px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            padding: 30px 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
             z-index: 1000;
             text-align: center;
             animation: slideIn 0.5s ease;
+            max-width: 90%;
+            width: 100%;
+        }
+
+        /* Mobile winner banner */
+        @media (max-width: 768px) {
+            .winner-banner {
+                padding: 20px 30px;
+                border-radius: 12px;
+                max-width: 95%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .winner-banner {
+                padding: 15px 20px;
+                border-radius: 10px;
+                max-width: 98%;
+            }
         }
 
         @keyframes slideIn {
@@ -266,8 +549,23 @@
         }
 
         .winner-banner h2 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        /* Mobile winner banner text */
+        @media (max-width: 768px) {
+            .winner-banner h2 {
+                font-size: 1.8em;
+                margin-bottom: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .winner-banner h2 {
+                font-size: 1.5em;
+                margin-bottom: 10px;
+            }
         }
 
         .overlay {
@@ -279,11 +577,179 @@
             background: rgba(0,0,0,0.7);
             z-index: 999;
         }
+
+        /* Rules Popover Styles */
+        .rules-popover {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            z-index: 1001;
+            max-width: 90%;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease;
+        }
+
+        .rules-popover h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8em;
+        }
+
+        .rules-content {
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .rules-content h3 {
+            color: #667eea;
+            margin: 20px 0 10px 0;
+            font-size: 1.2em;
+        }
+
+        .rules-content ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .rules-content li {
+            margin: 8px 0;
+        }
+
+        .rules-content .emoji {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+
+        .close-rules-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-rules-btn:hover {
+            background: #ff5252;
+            transform: scale(1.1);
+        }
+
+        /* Mobile rules popover */
+        @media (max-width: 768px) {
+            .rules-popover {
+                padding: 20px;
+                border-radius: 12px;
+                max-width: 95%;
+                max-height: 85vh;
+            }
+            
+            .rules-popover h2 {
+                font-size: 1.5em;
+                margin-bottom: 15px;
+            }
+            
+            .rules-content h3 {
+                font-size: 1.1em;
+                margin: 15px 0 8px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .rules-popover {
+                padding: 15px;
+                border-radius: 10px;
+                max-width: 98%;
+                max-height: 90vh;
+            }
+            
+            .rules-popover h2 {
+                font-size: 1.3em;
+                margin-bottom: 12px;
+            }
+            
+            .rules-content h3 {
+                font-size: 1em;
+                margin: 12px 0 6px 0;
+            }
+            
+            .close-rules-btn {
+                width: 25px;
+                height: 25px;
+                font-size: 1em;
+                top: 10px;
+                right: 10px;
+            }
+        }
+
+        /* Additional mobile optimizations */
+        @media (max-width: 768px) {
+            .game-mode {
+                font-size: 0.8em;
+                margin-top: 8px;
+            }
+            
+            .stat-box h3 {
+                font-size: 0.8em;
+                margin-bottom: 3px;
+            }
+            
+            .stat-box .number {
+                font-size: 1.5em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-mode {
+                font-size: 0.75em;
+                margin-top: 6px;
+            }
+            
+            .stat-box h3 {
+                font-size: 0.75em;
+                margin-bottom: 2px;
+            }
+            
+            .stat-box .number {
+                font-size: 1.3em;
+            }
+        }
+
+        /* Prevent zoom on double tap for mobile */
+        * {
+            touch-action: manipulation;
+        }
+
+        /* Ensure proper scrolling on mobile */
+        @media (max-width: 768px) {
+            body {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎮 RPS Tic-Tac-Toe</h1>
+        <div class="header">
+            <h1>🎮 RPS Tic-Tac-Toe</h1>
+            <button class="rules-btn" onclick="toggleRules()" title="Game Rules">❓</button>
+        </div>
         
         <div class="turn-indicator" id="turnIndicator">Red's Turn</div>
         
@@ -322,6 +788,45 @@
         </div>
         
         <button class="reset-btn" onclick="resetGame()">Reset Game</button>
+    </div>
+
+    <!-- Rules Popover -->
+    <div class="rules-popover" id="rulesPopover" style="display: none;">
+        <button class="close-rules-btn" onclick="toggleRules()">×</button>
+        <h2>🎮 How to Play RPS Tic-Tac-Toe</h2>
+        <div class="rules-content">
+            <h3>🎯 Objective</h3>
+            <p>Get three of your pieces in a row (horizontally, vertically, or diagonally) to win! But there's a twist - pieces can capture each other using Rock-Paper-Scissors rules.</p>
+            
+            <h3>🪨📄✂️ Rock-Paper-Scissors Rules</h3>
+            <ul>
+                <li><span class="emoji">🪨</span> Rock beats Scissors</li>
+                <li><span class="emoji">📄</span> Paper beats Rock</li>
+                <li><span class="emoji">✂️</span> Scissors beats Paper</li>
+            </ul>
+            
+            <h3>🎮 Game Modes</h3>
+            <p><strong>Place Piece:</strong> Select a piece type (Rock, Paper, or Scissors) and place it on an empty square.</p>
+            <p><strong>Move Piece:</strong> Move one of your existing pieces to an adjacent empty square.</p>
+            
+            <h3>⚔️ Capturing</h3>
+            <p>After placing or moving a piece, if you can capture an opponent's piece using RPS rules, you'll enter capture mode. Click your piece, then click the opponent's piece to capture it!</p>
+            
+            <h3>🏆 Winning</h3>
+            <ul>
+                <li><strong>Regular Win:</strong> Get 3 pieces in a row (+1 point)</li>
+                <li><strong>Special Win:</strong> Get 3 of the SAME piece type in a row (+2 points!)</li>
+                <li><strong>Draw:</strong> Board fills up with no winner</li>
+            </ul>
+            
+            <h3>💡 Tips</h3>
+            <ul>
+                <li>Plan your captures strategically</li>
+                <li>Try to get special wins for bonus points</li>
+                <li>Block your opponent's winning moves</li>
+                <li>Use movement to set up powerful captures</li>
+            </ul>
+        </div>
     </div>
 
     <script>
@@ -733,6 +1238,41 @@
             updateBoard();
             updateUI();
         }
+
+        function toggleRules() {
+            const rulesPopover = document.getElementById('rulesPopover');
+            const isVisible = rulesPopover.style.display !== 'none';
+            
+            if (isVisible) {
+                rulesPopover.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            } else {
+                rulesPopover.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        // Close rules when clicking outside
+        document.addEventListener('click', function(event) {
+            const rulesPopover = document.getElementById('rulesPopover');
+            const rulesBtn = document.querySelector('.rules-btn');
+            
+            if (rulesPopover.style.display !== 'none' && 
+                !rulesPopover.contains(event.target) && 
+                !rulesBtn.contains(event.target)) {
+                toggleRules();
+            }
+        });
+
+        // Close rules with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const rulesPopover = document.getElementById('rulesPopover');
+                if (rulesPopover.style.display !== 'none') {
+                    toggleRules();
+                }
+            }
+        });
 
         initBoard();
         updateUI();
