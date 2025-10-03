@@ -29,9 +29,9 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             max-width: 100%;
             width: 100%;
-            max-height: calc(100vh - 20px);
-            overflow-y: auto;
-            padding-bottom: 200px; /* room for sticky stats and reset on mobile/desktop */
+            max-height: none; /* allow full document height so board isn't clipped */
+            overflow-y: visible;
+            padding-bottom: 24px;
         }
 
         /* Mobile-first responsive design */
@@ -352,15 +352,7 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
             margin-bottom: 15px;
-        }
-
-        /* Keep stats row always visible above the sticky reset button */
-        .stats {
-            position: sticky;
-            bottom: 64px;
-            z-index: 4;
-            background: white;
-            padding-top: 6px;
+            margin-top: 12px; /* ensure it always sits below the board */
         }
 
         .stat-box {
@@ -426,10 +418,8 @@
             transition: all 0.3s ease;
             font-weight: bold;
             touch-action: manipulation;
-            position: sticky;
-            bottom: 0;
-            z-index: 5;
-            box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
+            margin-top: 14px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
         }
 
         /* Mobile button optimization */
@@ -539,33 +529,31 @@
         }
 
         .winner-banner {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            position: relative;
             background: white;
-            padding: 30px 40px;
-            border-radius: 15px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-            z-index: 1000;
+            padding: 20px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            z-index: 1;
             text-align: center;
-            animation: slideIn 0.5s ease;
-            max-width: 90%;
+            animation: slideIn 0.3s ease;
+            max-width: 800px;
             width: 100%;
+            margin: 8px auto 16px auto; /* sits above selectors, below header */
         }
 
         /* Mobile winner banner */
         @media (max-width: 768px) {
             .winner-banner {
-                padding: 20px 30px;
-                border-radius: 12px;
+                padding: 16px 18px;
+                border-radius: 10px;
                 max-width: 95%;
             }
         }
 
         @media (max-width: 480px) {
             .winner-banner {
-                padding: 15px 20px;
+                padding: 12px 16px;
                 border-radius: 10px;
                 max-width: 98%;
             }
@@ -610,6 +598,29 @@
             height: 100%;
             background: rgba(0,0,0,0.7);
             z-index: 999;
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 20px;
+            transform: translateX(-50%) translateY(120%);
+            background: rgba(0,0,0,0.85);
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 9999px;
+            font-size: 0.95em;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            z-index: 2000;
+            opacity: 0;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
         }
 
         /* Rules Popover Styles */
@@ -833,10 +844,10 @@
             
             <h3>🎮 Game Modes</h3>
             <p><strong>Place Piece:</strong> Select a piece type (Rock, Paper, or Scissors) and place it on an empty square.</p>
-            <p><strong>Move Piece:</strong> Move one of your existing pieces to an adjacent empty square.</p>
+            <p><strong>Move Piece:</strong> Move one of your existing pieces to an adjacent empty square. Moving consumes your turn.</p>
             
             <h3>⚔️ Capturing</h3>
-            <p>After placing or moving a piece, if you can capture an opponent's piece using RPS rules, you'll enter capture mode. You can only capture pieces that are adjacent (sharing an edge) or diagonally adjacent (kitty-corner) to your piece.</p>
+            <p>After placing or moving a piece, if you can capture an opponent's piece using RPS rules, you'll enter capture mode. You can only capture pieces that are adjacent (sharing an edge) or diagonally adjacent (kitty-corner) to your piece. Capturing consumes your turn.</p>
             <p><strong>Adjacent positions:</strong> Up, down, left, right, and all 4 diagonal corners from your piece.</p>
             <p>Click your piece, then click the adjacent opponent's piece to capture it!</p>
             
@@ -856,6 +867,9 @@
             </ul>
         </div>
     </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast" aria-live="polite" aria-atomic="true"></div>
 
     <script>
         const pieceEmojis = {
@@ -938,6 +952,15 @@
             
             document.getElementById('pieceSelector').style.display = 
                 (gameState.captureMode || gameState.turnMode === 'move') ? 'none' : 'flex';
+        }
+
+        function showToast(message) {
+            const el = document.getElementById('toast');
+            if (!el) return;
+            el.textContent = message;
+            el.classList.add('show');
+            clearTimeout(showToast._t);
+            showToast._t = setTimeout(() => el.classList.remove('show'), 1500);
         }
 
         document.querySelectorAll('.piece-btn').forEach(btn => {
@@ -1088,6 +1111,29 @@
             
             const cell = gameState.board[index];
             
+            // Allow initiating a capture directly by clicking your piece
+            // even if we're not already in capture mode (and not in move mode)
+            if (!gameState.captureMode && gameState.turnMode !== 'move') {
+                if (cell && cell.player === gameState.currentPlayer) {
+                    let canCaptureAny = false;
+                    for (let j = 0; j < 9; j++) {
+                        const target = gameState.board[j];
+                        if (target && target.player !== gameState.currentPlayer &&
+                            isAdjacent(index, j) && canCapture(cell.piece, target.piece)) {
+                            canCaptureAny = true;
+                            break;
+                        }
+                    }
+                    if (canCaptureAny) {
+                        gameState.captureMode = true;
+                        gameState.selectedCaptureCell = index;
+                        highlightCapturablePieces();
+                        updateUI();
+                        return;
+                    }
+                }
+            }
+
             if (gameState.captureMode) {
                 if (gameState.selectedCaptureCell === null) {
                     if (cell && cell.player === gameState.currentPlayer) {
@@ -1121,8 +1167,17 @@
                         gameState.captureMode = false;
                         gameState.selectedCaptureCell = null;
                         updateBoard();
+                        
+                        // Check win after capture
+                        if (checkWinner()) {
+                            return;
+                        }
+                        
+                        // Capturing consumes the turn
+                        gameState.currentPlayer = gameState.currentPlayer === 'red' ? 'blue' : 'red';
+                        gameState.turnMode = 'place';
+                        showToast(`${gameState.currentPlayer === 'red' ? 'Red' : 'Blue'}'s turn`);
                         updateUI();
-                        highlightCapturablePieces();
                     }
                 }
             } else if (gameState.turnMode === 'move') {
@@ -1151,12 +1206,7 @@
                         gameState.selectedMoveCell = null;
                         gameState.turnMode = 'place';
                         setMode('place');
-                        
-                        if (checkCapturePossible()) {
-                            gameState.captureMode = true;
-                            highlightCapturablePieces();
-                        }
-                        
+                        showToast(`${gameState.currentPlayer === 'red' ? 'Red' : 'Blue'}'s turn`);
                         updateUI();
                     }
                 }
@@ -1179,12 +1229,7 @@
                     
                     gameState.turnMode = 'place';
                     setMode('place');
-                    
-                    if (checkCapturePossible()) {
-                        gameState.captureMode = true;
-                        highlightCapturablePieces();
-                    }
-                    
+                    showToast(`${gameState.currentPlayer === 'red' ? 'Red' : 'Blue'}'s turn`);
                     updateUI();
                 }
             }
@@ -1235,9 +1280,6 @@
                 }
             }
             
-            const overlay = document.createElement('div');
-            overlay.className = 'overlay';
-            
             const banner = document.createElement('div');
             banner.className = 'winner-banner';
             
@@ -1257,16 +1299,19 @@
                 `;
             }
             
-            document.body.appendChild(overlay);
-            document.body.appendChild(banner);
+            const container = document.querySelector('.container');
+            const insertBeforeEl = document.querySelector('.mode-selector');
+            if (container && insertBeforeEl) {
+                container.insertBefore(banner, insertBeforeEl);
+            } else {
+                document.body.appendChild(banner);
+            }
             
             updateUI();
         }
 
         function closeWinnerBanner() {
-            const overlay = document.querySelector('.overlay');
             const banner = document.querySelector('.winner-banner');
-            if (overlay) overlay.remove();
             if (banner) banner.remove();
             resetGame();
         }
