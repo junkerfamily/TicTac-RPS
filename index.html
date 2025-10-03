@@ -816,11 +816,11 @@
         <div class="stats">
             <div class="stat-box red">
                 <h3>Red Captures/Wins</h3>
-                <div class="number" id="redStats">C: 0 | W: 0</div>
+                <div class="number" id="redStats">0 | 0</div>
             </div>
             <div class="stat-box blue">
                 <h3>Blue Captures/Wins</h3>
-                <div class="number" id="blueStats">C: 0 | W: 0</div>
+                <div class="number" id="blueStats">0 | 0</div>
             </div>
         </div>
         
@@ -930,8 +930,8 @@
             
             const redStatsEl = document.getElementById('redStats');
             const blueStatsEl = document.getElementById('blueStats');
-            if (redStatsEl) redStatsEl.textContent = `C: ${gameState.redCaptures} | W: ${gameState.redWins}`;
-            if (blueStatsEl) blueStatsEl.textContent = `C: ${gameState.blueCaptures} | W: ${gameState.blueWins}`;
+            if (redStatsEl) redStatsEl.textContent = `${gameState.redCaptures} | ${gameState.redWins}`;
+            if (blueStatsEl) blueStatsEl.textContent = `${gameState.blueCaptures} | ${gameState.blueWins}`;
             
             const gameMode = document.getElementById('gameMode');
             if (gameState.captureMode) {
